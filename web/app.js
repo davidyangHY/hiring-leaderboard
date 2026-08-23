@@ -185,6 +185,8 @@ function escapeHtml(s) {
 // ---------- Company drill-down (role list + seniority) ----------
 let ROLES = null;                // lazy-loaded [{c,f,s,t,d,u}]
 const SEN_ORDER = ["Leadership", "Staff+", "Senior", "Junior", "Intern", "Unspecified"];
+let detailRoles = [];            // roles for the open company (company + function + window)
+const detailSelected = new Set();// seniority levels currently used as filters
 
 async function loadRoles() {
   if (!ROLES) ROLES = await fetch("data/roles.json").then((r) => r.json());
@@ -207,6 +209,14 @@ function wireModal() {
       if (row) { e.preventDefault(); openDetail(row.dataset.company); }
     }
   });
+  // Clicking a seniority box toggles it as a filter on the role list.
+  $("m-senior").addEventListener("click", (e) => {
+    const tag = e.target.closest(".sen-tag");
+    if (!tag || !tag.dataset.level) return;
+    const lvl = tag.dataset.level;
+    detailSelected.has(lvl) ? detailSelected.delete(lvl) : detailSelected.add(lvl);
+    renderDetailRoles();
+  });
 }
 
 async function openDetail(company) {
@@ -228,16 +238,33 @@ async function openDetail(company) {
   const fnLabel = wantFn === "All" ? "all functions" : wantFn;
   $("m-sub").textContent = `${list.length} new ${wantFn === "All" ? "" : wantFn + " "}role${list.length === 1 ? "" : "s"} · ${fnLabel} · ${windowLabel()}`;
 
-  // seniority summary
+  // seniority summary — each level is a clickable filter (click to toggle)
+  detailRoles = list;
+  detailSelected.clear();
   const counts = {};
   list.forEach((r) => { counts[r.s] = (counts[r.s] || 0) + 1; });
   $("m-senior").innerHTML = SEN_ORDER.filter((l) => counts[l])
-    .map((l) => `<span class="sen-tag"><b>${l}</b><span class="c">${counts[l]}</span></span>`).join("")
-    || `<span class="sen-tag"><span class="c">No roles in this window</span></span>`;
+    .map((l) => `<button class="sen-tag" data-level="${l}" title="Filter to ${l}"><b>${l}</b><span class="c">${counts[l]}</span></button>`).join("")
+    || `<span class="sen-empty">No roles in this window</span>`;
 
-  // role list: senior-most first, then most recent
-  list.sort((a, b) => (SEN_ORDER.indexOf(a.s) - SEN_ORDER.indexOf(b.s)) || (a.d < b.d ? 1 : -1));
-  $("m-roles").innerHTML = list.map((r) => {
+  renderDetailRoles();
+}
+
+// Render the modal's role list, filtered by any selected seniority levels.
+function renderDetailRoles() {
+  const sel = detailSelected;
+  document.querySelectorAll("#m-senior .sen-tag").forEach((b) =>
+    b.classList.toggle("active", sel.has(b.dataset.level)));
+  const rows = sel.size ? detailRoles.filter((r) => sel.has(r.s)) : detailRoles;
+
+  const listEl = $("m-roles");
+  if (!rows.length) {
+    listEl.innerHTML = `<li class="m-role m-role-empty">No roles at the selected level.</li>`;
+    return;
+  }
+  const sorted = [...rows].sort((a, b) =>
+    (SEN_ORDER.indexOf(a.s) - SEN_ORDER.indexOf(b.s)) || (a.d < b.d ? 1 : -1));
+  listEl.innerHTML = sorted.map((r) => {
     const lead = r.s === "Leadership" ? " lead-lvl" : "";
     const title = r.u
       ? `<a href="${escapeHtml(r.u)}" target="_blank" rel="noopener">${escapeHtml(r.t)}</a>`
