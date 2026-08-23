@@ -1,0 +1,104 @@
+company,ats,slug,headcount,hq,notes
+Stripe,greenhouse,stripe,8000,"South San Francisco, CA",Payments
+Anthropic,greenhouse,anthropic,2000,"San Francisco, CA",AI
+OpenAI,ashby,openai,3000,"San Francisco, CA",AI
+Databricks,greenhouse,databricks,7000,"San Francisco, CA",Data/AI
+Snowflake,ashby,snowflake,7500,"Bozeman, MT",Data
+Coinbase,greenhouse,coinbase,3700,Remote,Crypto
+Robinhood,greenhouse,robinhood,2300,"Menlo Park, CA",Fintech
+Instacart,greenhouse,instacart,3500,"San Francisco, CA",Delivery
+Dropbox,greenhouse,dropbox,2700,"San Francisco, CA",SaaS
+Reddit,greenhouse,reddit,2000,"San Francisco, CA",Social
+Discord,greenhouse,discord,1000,"San Francisco, CA",Social
+Datadog,greenhouse,datadog,5000,"New York, NY",Observability
+Plaid,ashby,plaid,1200,"San Francisco, CA",Fintech
+Brex,greenhouse,brex,1300,"San Francisco, CA",Fintech
+Ramp,ashby,ramp,1000,"New York, NY",Fintech
+Linear,ashby,linear,100,Remote,Dev tools
+Notion,ashby,notion,800,"San Francisco, CA",Productivity
+Vercel,greenhouse,vercel,600,"San Francisco, CA",Dev tools
+Figma,greenhouse,figma,1500,"San Francisco, CA",Design
+Airtable,greenhouse,airtable,1000,"San Francisco, CA",Productivity
+Gusto,greenhouse,gusto,2500,"San Francisco, CA",HR/Payroll
+Vanta,ashby,vanta,700,"San Francisco, CA",Security
+Scale AI,greenhouse,scaleai,900,"San Francisco, CA",AI/Data
+Samsara,greenhouse,samsara,2500,"San Francisco, CA",IoT
+Mercury,greenhouse,mercury,1000,"San Francisco, CA",Fintech
+Airbnb,greenhouse,airbnb,7000,"San Francisco, CA",Travel
+Pinterest,greenhouse,pinterest,4500,"San Francisco, CA",Social
+Roblox,greenhouse,roblox,2400,"San Mateo, CA",Gaming
+Twitch,greenhouse,twitch,1800,"San Francisco, CA",Streaming
+Cloudflare,greenhouse,cloudflare,4000,"San Francisco, CA",Infra
+SpaceX,greenhouse,spacex,13000,"Hawthorne, CA",Aerospace
+Anduril,greenhouse,andurilindustries,3500,"Costa Mesa, CA",Defense
+Palantir,lever,palantir,3900,"Denver, CO",Data/Defense
+Cohere,ashby,cohere,500,"Toronto, Canada",AI
+Perplexity,ashby,perplexity,200,"San Francisco, CA",AI
+Runway,ashby,runway,150,"New York, NY",AI/Video
+Character.AI,ashby,character,120,"Menlo Park, CA",AI
+ElevenLabs,ashby,elevenlabs,200,"London, UK",AI/Voice
+Together AI,greenhouse,togetherai,150,"San Francisco, CA",AI infra
+Glean,greenhouse,gleanwork,700,"Palo Alto, CA",AI/Search
+Sierra,ashby,sierra,200,"San Francisco, CA",AI
+Harvey,ashby,harvey,340,"San Francisco, CA",AI/Legal
+Writer,ashby,writer,250,"San Francisco, CA",AI
+Cresta,greenhouse,cresta,250,"San Francisco, CA",AI
+Decagon,ashby,decagon,100,"San Francisco, CA",AI
+Suno,ashby,suno,60,"Cambridge, MA",AI/Music
+Luma AI,ashby,lumaai,100,"Palo Alto, CA",AI/Video
+Chime,greenhouse,chime,1300,"San Francisco, CA",Fintech
+Affirm,greenhouse,affirm,2000,"San Francisco, CA",Fintech
+Wise,greenhouse,wise,5500,"London, UK",Fintech
+Modern Treasury,ashby,moderntreasury,150,"San Francisco, CA",Fintech
+Column,ashby,column,100,"San Francisco, CA",Fintech
+Stytch,ashby,stytch,120,"San Francisco, CA",Auth
+Marqeta,greenhouse,marqeta,800,"Oakland, CA",Fintech
+Carta,greenhouse,carta,1500,"San Francisco, CA",Fintech
+Alloy,greenhouse,alloy,400,"New York, NY",Fintech
+GitLab,greenhouse,gitlab,2100,Remote,Dev tools
+Confluent,ashby,confluent,3000,"Mountain View, CA",Data
+Elastic,greenhouse,elastic,3500,"Mountain View, CA",Search
+MongoDB,greenhouse,mongodb,5000,"New York, NY",Database
+Grafana Labs,greenhouse,grafanalabs,1200,"New York, NY",Observability
+Sentry,ashby,sentry,350,"San Francisco, CA",Dev tools
+Postman,greenhouse,postman,800,"San Francisco, CA",Dev tools
+Supabase,ashby,supabase,120,Remote,Database
+Neon,ashby,neon,100,Remote,Database
+PlanetScale,greenhouse,planetscale,120,Remote,Database
+Cockroach Labs,greenhouse,cockroachlabs,350,"New York, NY",Database
+Temporal,greenhouse,temporaltechnologies,250,"Seattle, WA",Dev tools
+Docker,ashby,docker,400,Remote,Dev tools
+Replit,ashby,replit,100,"San Francisco, CA",Dev tools
+ClickHouse,greenhouse,clickhouse,250,Remote,Data
+Airbyte,ashby,airbyte,200,"San Francisco, CA",Data
+Fivetran,greenhouse,fivetran,1200,"Oakland, CA",Data
+Hex,ashby,hex,200,"San Francisco, CA",Data
+Modal,ashby,modal,80,"New York, NY",AI infra
+Render,ashby,render,100,"San Francisco, CA",Cloud
+Warp,greenhouse,warp,60,"New York, NY",Dev tools
+Asana,greenhouse,asana,1600,"San Francisco, CA",Productivity
+Webflow,greenhouse,webflow,600,"San Francisco, CA",Web
+Amplitude,greenhouse,amplitude,800,"San Francisco, CA",Analytics
+Attentive,greenhouse,attentive,500,"New York, NY",Marketing
+Intercom,greenhouse,intercom,1000,"San Francisco, CA",SaaS
+Lattice,greenhouse,lattice,600,"San Francisco, CA",HR
+Miro,ashby,miro,1800,"San Francisco, CA",Collaboration
+1Password,ashby,1password,1400,"Toronto, Canada",Security
+Abnormal Security,greenhouse,abnormalsecurity,800,"San Francisco, CA",Security
+Tailscale,greenhouse,tailscale,100,"Toronto, Canada",Networking
+Semgrep,ashby,semgrep,150,"San Francisco, CA",Security
+Chainguard,greenhouse,chainguard,300,"Kirkland, WA",Security
+Faire,greenhouse,faire,1000,"San Francisco, CA",Marketplace
+Duolingo,greenhouse,duolingo,800,"Pittsburgh, PA",EdTech
+Strava,ashby,strava,250,"San Francisco, CA",Fitness
+Nextdoor,greenhouse,nextdoor,600,"San Francisco, CA",Social
+Substack,ashby,substack,100,"San Francisco, CA",Media
+Patreon,ashby,patreon,350,"San Francisco, CA",Creator
+Life360,greenhouse,life360,450,"San Francisco, CA",Consumer
+Astranis,greenhouse,astranis,400,"San Francisco, CA",Space
+Zipline,greenhouse,flyzipline,1000,"South San Francisco, CA",Logistics/Drones
+Skydio,ashby,skydio,600,"San Mateo, CA",Drones
+Figure,greenhouse,figureai,300,"Sunnyvale, CA",Robotics
+Saronic,ashby,saronic,300,"Austin, TX",Defense
+Commure,ashby,commure,500,"Mountain View, CA",Health
+Abridge,ashby,abridge,300,"San Francisco, CA",Health/AI

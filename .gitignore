@@ -1,0 +1,29 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# dbt
+dbt_project/target/
+dbt_project/logs/
+dbt_project/dbt_packages/
+.user.yml
+
+# Data: keep the committed snapshot history (data/snapshots/*.parquet) and the
+# site's exported JSON (web/data/*.json). Ignore the derived DuckDB warehouse
+# (rebuilt from the Parquet each run) and any scratch raw files.
+data/hiring.duckdb
+data/raw/
+
+# Parked earlier project iteration — kept locally, not part of this repo.
+archive/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

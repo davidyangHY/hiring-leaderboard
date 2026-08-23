@@ -1,0 +1,10 @@
+# DuckDB profile. The warehouse is written by src/snapshot.py and read by the
+# export step. Run dbt from this directory (Makefile / cron do `cd dbt_project`).
+hiring_leaderboard:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('HIRING_DUCKDB_PATH', '../data/hiring.duckdb') }}"
+      schema: main
+      threads: 4

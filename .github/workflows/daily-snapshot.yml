@@ -1,0 +1,54 @@
+name: Daily hiring snapshot
+
+# Runs the pipeline once a day: fetch each company's board, detect new roles via
+# snapshot diffing, model with dbt, export JSON for the site, and commit the
+# refreshed data. This is what makes the leaderboard live and self-updating —
+# and what lets true change-data-capture history accumulate over time.
+
+on:
+  schedule:
+    - cron: "0 9 * * *"      # 09:00 UTC daily
+  workflow_dispatch: {}       # allow manual runs from the Actions tab
+
+permissions:
+  contents: write             # required to commit the refreshed data back
+
+concurrency:
+  group: daily-snapshot       # never overlap two runs
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Snapshot job boards (fetch + classify + CDC)
+        run: python -m src.snapshot
+
+      - name: Build + test dbt models
+        run: cd dbt_project && dbt build --profiles-dir .
+
+      - name: Export JSON for the site
+        run: python -m src.export_json
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "hiring-leaderboard-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/snapshots web/data
+          if git diff --cached --quiet; then
+            echo "No data changes today."
+          else
+            git commit -m "chore: daily snapshot $(date -u +%Y-%m-%d)"
+            git push
+          fi

@@ -1,0 +1,7 @@
+requests>=2.31
+duckdb>=0.10
+dbt-core>=1.7
+dbt-duckdb>=1.7
+pandas>=2.0
+pytest>=7.0
+ruff>=0.4

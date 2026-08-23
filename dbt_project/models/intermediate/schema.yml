@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: int_role_spans
+    description: One row per role with its lifespan and effective posted date.
+    columns:
+      - name: role_id
+        tests: [not_null]
+      - name: company
+        tests: [not_null]
+      - name: effective_posted_date
+        tests: [not_null]
+    # (company, role_id) uniqueness is checked by a singular test in tests/.

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" data-theme="">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Hiring Leaderboard — where tech is hiring now</title>
+  <meta name="description" content="A live leaderboard of which tech companies are opening the most new roles — overall, by function, and per employee. Updated daily.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>The Hiring Leaderboard</h1>
+          <p class="tagline">Where tech is actually hiring — new roles across <span id="co-count">—</span> companies, updated daily.</p>
+        </div>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+        <span class="theme-icon"></span>
+      </button>
+    </header>
+
+    <section class="stats" id="stats"></section>
+
+    <section class="controls" aria-label="Filters">
+      <div class="control timeframe">
+        <div class="control-head">
+          <label for="days">Timeframe</label>
+          <span class="window-label" id="window-label">last 90 days</span>
+        </div>
+        <input type="range" id="days" min="7" max="365" step="1" value="90">
+        <div class="presets" id="presets">
+          <button data-days="7">7d</button>
+          <button data-days="30">30d</button>
+          <button data-days="90" class="active">90d</button>
+          <button data-days="180">6mo</button>
+          <button data-days="365">1yr</button>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="control-head"><label>Rank by</label></div>
+        <div class="segmented" id="metric" role="group" aria-label="Metric">
+          <button data-metric="new" class="active">New roles</button>
+          <button data-metric="pct">% of headcount</button>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="control-head"><label>Company size</label></div>
+        <div class="segmented" id="size" role="group" aria-label="Company size">
+          <button data-size="All" class="active">All</button>
+          <button data-size="Startup" title="Under 500 employees">Startup</button>
+          <button data-size="Scaleup" title="500–5,000 employees">Scaleup</button>
+          <button data-size="Enterprise" title="5,000+ employees">Enterprise</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="functions" id="functions" aria-label="Function filter"></nav>
+
+    <main>
+      <div class="board-head">
+        <h2 id="board-title">Overall leaders</h2>
+        <span class="board-sub" id="board-sub"></span>
+      </div>
+      <ol class="board" id="board"></ol>
+      <p class="empty" id="empty" hidden>No new roles in this window for the selected filter.</p>
+    </main>
+
+    <footer class="foot">
+      <div class="foot-meta">
+        <span id="updated">—</span>
+        <span class="dot">·</span>
+        <span>Tracking new roles across public company job boards</span>
+      </div>
+      <p class="foot-note">
+        Early data: until daily snapshot history builds up, new-role counts are estimated from posting
+        dates and can overstate companies that frequently re-post listings; accuracy improves over time.
+      </p>
+    </footer>
+  </div>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal-scrim" id="modal-scrim"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="m-title">
+      <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      <div class="m-head">
+        <div class="eyebrow" id="m-context">—</div>
+        <h3 id="m-title">—</h3>
+        <p class="m-sub" id="m-sub"></p>
+      </div>
+      <div class="m-senior" id="m-senior"></div>
+      <ol class="m-roles" id="m-roles"></ol>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

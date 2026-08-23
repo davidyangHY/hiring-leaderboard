@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: mart_new_roles_daily
+    description: New roles per day x company x function (slider sums over a window).
+    columns:
+      - name: posted_date
+        tests: [not_null]
+      - name: company
+        tests: [not_null]
+      - name: function
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Engineering", "Product", "Data", "Design", "Sales",
+                       "Marketing", "Finance", "People", "Legal", "Support",
+                       "Operations", "Other"]
+      - name: new_roles
+        tests: [not_null]
+
+  - name: mart_company_summary
+    description: One row per tracked company with headcount and open-role count.
+    columns:
+      - name: company
+        tests: [unique, not_null]
+      - name: open_roles
+        tests: [not_null]
