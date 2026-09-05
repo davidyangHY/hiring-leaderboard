@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-04T09:10:06+00:00",
-  "last_snapshot": "2026-09-04",
+  "generated_at": "2026-09-05T09:08:07+00:00",
+  "last_snapshot": "2026-09-05",
   "date_min": "2018-04-24",
-  "date_max": "2026-09-04",
+  "date_max": "2026-09-05",
   "total_companies": 103,
-  "total_open_roles": 17523,
+  "total_open_roles": 17631,
   "functions": [
     "Data",
     "Design",
