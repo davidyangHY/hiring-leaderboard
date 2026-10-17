@@ -7,8 +7,11 @@ name: Daily hiring snapshot
 
 on:
   schedule:
-    - cron: "0 9 * * *"      # 09:00 UTC daily
-  workflow_dispatch: {}       # allow manual runs from the Actions tab
+    # Off the top of the hour: GitHub delays or drops scheduled runs most often at
+    # :00, when load peaks (a likely cause of the missing 2026-08-27 snapshot).
+    - cron: "17 9 * * *"     # primary, 09:17 UTC
+    - cron: "17 15 * * *"    # backup, 15:17 UTC: does nothing if today's snapshot exists
+  workflow_dispatch: {}       # manual runs always run in full
 
 permissions:
   contents: write             # required to commit the refreshed data back
@@ -28,29 +31,49 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # A scheduled run stops here if today's snapshot is already on the default
+      # branch (fetched fresh, in case another run committed after this one queued).
+      - name: Skip if today's snapshot already exists
+        id: check
+        run: |
+          today=$(date -u +%Y-%m-%d)
+          git fetch -q origin "${{ github.event.repository.default_branch }}"
+          if [ "${{ github.event_name }}" = "schedule" ] \
+             && git cat-file -e "FETCH_HEAD:data/snapshots/$today.parquet" 2>/dev/null; then
+            echo "Today's snapshot ($today) already exists; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-python@v5
+        if: steps.check.outputs.skip != 'true'
         with:
           python-version: "3.11"
           cache: pip
 
       - name: Install dependencies
+        if: steps.check.outputs.skip != 'true'
         run: pip install -r requirements.txt
 
       - name: Unit tests
+        if: steps.check.outputs.skip != 'true'
         run: python -m pytest -q tests
 
       # Fails the run (and so blocks dbt, export, commit and deploy) if any company
       # can't be fetched after retries or the day fails validation.
       - name: Snapshot job boards (fetch + validate + store)
+        if: steps.check.outputs.skip != 'true'
         run: python -m src.snapshot
 
       - name: Build + test dbt models
+        if: steps.check.outputs.skip != 'true'
         run: cd dbt_project && dbt build --profiles-dir .
 
       - name: Export JSON for the site
+        if: steps.check.outputs.skip != 'true'
         run: python -m src.export_json
 
       - name: Commit refreshed data
+        if: steps.check.outputs.skip != 'true'
         run: |
           git config user.name  "hiring-leaderboard-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
