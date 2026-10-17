@@ -6,6 +6,7 @@ select
     title,
     url,
     effective_posted_date as posted_date,
-    is_open
+    is_open,
+    closed_on
 from {{ ref('int_role_spans') }}
 where title is not null

@@ -178,6 +178,16 @@ function render() {
   }).join("");
 }
 
+// "2026-10-09" -> "Oct 9" (or "Oct 9, 2025" when it isn't the data's current year).
+function shortDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso + "T00:00:00Z");
+  const sameYear = state.anchor && iso.slice(0, 4) === state.anchor.slice(0, 4);
+  return d.toLocaleDateString("en-US", {
+    month: "short", day: "numeric", timeZone: "UTC", ...(sameYear ? {} : { year: "numeric" }),
+  });
+}
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
@@ -271,13 +281,17 @@ function renderDetailRoles() {
 
   const item = (r) => {
     const lead = r.s === "Leadership" && !r.x ? " lead-lvl" : "";
+    const closed = r.x ? shortDate(r.x) : "";
     const title = r.u
       ? `<a href="${escapeHtml(r.u)}" target="_blank" rel="noopener">${escapeHtml(r.t)}</a>`
-      : `<span class="rt">${escapeHtml(r.t)}</span>`;
-    return `<li class="m-role${r.x ? " closed" : ""}">
+      : `<span class="rt" data-closed="${closed}">${escapeHtml(r.t)}</span>`;
+    const when = r.x
+      ? `<span class="closed-tag">Closed ${closed}</span>`
+      : "";
+    return `<li class="m-role${r.x ? " closed" : ""}" title="Posted ${shortDate(r.d)}${r.x ? ` · closed ${closed}` : ""}">
       <span class="lvl${lead}">${r.s}</span>
       ${title}
-      <span class="rd">${r.x ? '<span class="closed-tag">Closed</span>' : ""}${r.d}</span>
+      <span class="rd">${when}${shortDate(r.d)}</span>
     </li>`;
   };
   listEl.innerHTML = open.map(item).join("")

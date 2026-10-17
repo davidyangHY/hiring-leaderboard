@@ -199,7 +199,7 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: none; b
 @media (max-width: 520px) {
   .m-role { grid-template-columns: 76px 1fr; }
   .m-role .rd { display: none; }
-  .m-role.closed .rt::after { content: " · closed"; font-size: .7rem; }
+  .m-role.closed .rt::after { content: " · closed " attr(data-closed); font-size: .7rem; }
 }
 
 @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
