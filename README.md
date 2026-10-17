@@ -15,7 +15,7 @@
 
 ## Overview
 
-Job boards show you *listings*. The Hiring Leaderboard shows you **momentum** — it turns 100+ company job boards into one ranked, filterable view of who's actually ramping up. Pick a timeframe and see which companies posted the most new roles, drill into any company to see the roles by seniority, and rank by raw count or **as a share of headcount** so a fast-growing startup can out-rank a giant.
+Job boards show you *listings*. The Hiring Leaderboard shows you **momentum** — it turns 200 company job boards into one ranked, filterable view of who's actually ramping up. Pick a timeframe and see which companies posted the most new roles, drill into any company to see the roles by seniority, and rank by raw count or **as a share of headcount** so a fast-growing startup can out-rank a giant.
 
 Built for job seekers deciding where to aim, and anyone tracking hiring as a signal of who's scaling.
 
@@ -30,7 +30,7 @@ Built for job seekers deciding where to aim, and anyone tracking hiring as a sig
 ## How it works
 
 ```
-100+ job boards → normalize → classify → validate → daily snapshot → dbt models → static JSON → site
+200 job boards → normalize → classify → validate → daily snapshot → dbt models → static JSON → site
 ```
 
 | Stage | What happens | Tech |
@@ -47,7 +47,7 @@ The business logic lives in `src/`, so the pipeline is orchestrator-agnostic —
 
 ## The data
 
-- **100+ companies**, ~19,000 open roles, refreshed **every day**
+- **200 companies**, ~30,000 open roles, refreshed **every day**
 - **Sources:** public applicant-tracking-system APIs — **Greenhouse, Lever, Ashby** (the same feeds their own careers pages use)
 - **What's counted:** job *postings*. A role listed in three cities counts three times. That's often three real openings and sometimes one flexible-location hire; companies differ, and public data can't tell which.
 - **When a role is "new":** the posting date the company's job board reports, pinned to the earliest date we've seen so a company re-dating a posting later can't move it.

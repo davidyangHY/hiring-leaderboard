@@ -100,3 +100,104 @@ Figure,greenhouse,figureai,300,"Sunnyvale, CA",Robotics
 Saronic,ashby,saronic,300,"Austin, TX",Defense
 Commure,ashby,commure,500,"Mountain View, CA",Health
 Abridge,ashby,abridge,300,"San Francisco, CA",Health/AI
+Cursor,ashby,cursor,300,"San Francisco, CA",AI/Dev tools
+Wonderful,ashby,wonderful,400,"Tel Aviv, Israel",AI
+Mercor,ashby,mercor,300,"San Francisco, CA",AI/Hiring
+Cognition,ashby,cognition,300,"San Francisco, CA",AI/Dev tools
+Higgsfield AI,ashby,higgsfieldai,150,"San Francisco, CA",AI/Video
+Rogo,ashby,rogo,150,"New York, NY",AI/Finance
+Lovable,greenhouse,lovable,150,"Stockholm, Sweden",AI/Dev tools
+Thinking Machines,ashby,thinkingmachines,100,"San Francisco, CA",AI
+Synthesia,ashby,synthesia,500,"London, UK",AI/Video
+Reflection AI,ashby,reflectionai,100,"New York, NY",AI
+TENEX.AI,ashby,tenex,150,,AI/Security
+Physical Intelligence,ashby,physicalintelligence,100,"San Francisco, CA",AI/Robotics
+Attio,ashby,attio,150,"London, UK",CRM
+Speak,ashby,speak,150,"San Francisco, CA",AI/EdTech
+Hebbia,ashby,hebbia-ai,150,"New York, NY",AI/Finance
+Granola,ashby,granola,80,"London, UK",AI/Productivity
+Gamma,ashby,gamma,100,"San Francisco, CA",AI/Productivity
+HeyGen,greenhouse,heygen,200,"Los Angeles, CA",AI/Video
+Chai Discovery,ashby,chaidiscovery,60,"San Francisco, CA",AI/Bio
+Ambience Healthcare,ashby,ambiencehealthcare,200,"San Francisco, CA",Health/AI
+depthfirst,ashby,depthfirst,40,"San Francisco, CA",AI/Security
+Doctronic,ashby,doctronic,60,"New York, NY",Health/AI
+Valerie Health,ashby,valeriehealth,60,,Health/AI
+Pika,ashby,pika,60,"Palo Alto, CA",AI/Video
+Crusoe,ashby,crusoe,1000,"San Francisco, CA",AI cloud
+CoreWeave,greenhouse,coreweave,1500,"Livingston, NJ",AI cloud
+xAI,greenhouse,xai,1200,"Palo Alto, CA",AI (part of SpaceX)
+Cerebras,ashby,cerebras,700,"Sunnyvale, CA",AI chips
+Baseten,ashby,baseten,200,"San Francisco, CA",AI infra
+LangChain,ashby,langchain,200,"San Francisco, CA",AI infra
+Lambda,ashby,lambda,600,"San Jose, CA",AI cloud
+Fireworks AI,ashby,fireworks,200,"Redwood City, CA",AI infra
+SambaNova,greenhouse,sambanovasystems,500,"Palo Alto, CA",AI chips
+Snorkel AI,greenhouse,snorkelai,300,"Redwood City, CA",AI/Data
+Anyscale,ashby,anyscale,250,"San Francisco, CA",AI infra
+Shield AI,lever,shieldai,1100,"San Diego, CA",Defense
+Rocket Lab,greenhouse,rocketlab,2600,"Long Beach, CA",Space
+Relativity Space,greenhouse,relativity,1000,"Long Beach, CA",Space
+Waymo,greenhouse,waymo,2500,"Mountain View, CA",Autonomy
+Wayve,ashby,wayve,500,"London, UK",Autonomy
+Chaos Industries,greenhouse,chaosindustries,300,"Los Angeles, CA",Defense
+Mach Industries,greenhouse,machindustries,200,"Huntington Beach, CA",Defense
+Varda Space,greenhouse,vardaspace,200,"El Segundo, CA",Space
+Nuro,greenhouse,nuro,900,"Mountain View, CA",Autonomy
+1X,ashby,1x,400,"Palo Alto, CA",Robotics
+Apptronik,greenhouse,apptronik,300,"Austin, TX",Robotics
+Neuralink,greenhouse,neuralink,500,"Fremont, CA",Neurotech
+Agility Robotics,greenhouse,agilityrobotics,300,"Salem, OR",Robotics
+Epirus,greenhouse,epirus,300,"Torrance, CA",Defense
+Lucid,greenhouse,lucidmotors,6800,"Newark, CA",EV
+Form Energy,ashby,formenergy,1000,"Somerville, MA",Energy
+Redwood Materials,greenhouse,redwoodmaterials,1300,"Carson City, NV",Climate
+Commonwealth Fusion,lever,cfsenergy,1000,"Devens, MA",Energy
+Oklo,greenhouse,oklo,300,"Santa Clara, CA",Energy
+Helion,ashby,helion,500,"Everett, WA",Energy
+Fervo Energy,greenhouse,fervoenergy,400,"Houston, TX",Energy
+Radiant Nuclear,ashby,radiant,200,"El Segundo, CA",Energy
+Toast,greenhouse,toast,5500,"Boston, MA",Fintech
+Block,greenhouse,block,11000,"Oakland, CA",Fintech
+Navan,greenhouse,tripactions,3000,"Palo Alto, CA",Fintech/Travel
+Addepar,greenhouse,addepar1,900,"Mountain View, CA",Fintech
+Monzo,greenhouse,monzo,3500,"London, UK",Fintech
+SoFi,greenhouse,sofi,5000,"San Francisco, CA",Fintech
+Rho,ashby,rho,200,"New York, NY",Fintech
+Gemini,greenhouse,gemini,500,"New York, NY",Crypto
+Fireblocks,greenhouse,fireblocks,800,"New York, NY",Crypto
+Betterment,greenhouse,betterment,500,"New York, NY",Fintech
+Anchorage Digital,lever,anchorage,400,"San Francisco, CA",Crypto
+Okta,greenhouse,okta,6000,"San Francisco, CA",Security
+Verkada,greenhouse,verkada,2000,"San Mateo, CA",Security
+Twilio,greenhouse,twilio,5500,"San Francisco, CA",Dev tools
+Box,greenhouse,boxinc,2600,"Redwood City, CA",SaaS
+Sigma Computing,greenhouse,sigmacomputing,700,"San Francisco, CA",Data
+Harness,greenhouse,harnessinc,1200,"San Francisco, CA",Dev tools
+Neo4j,greenhouse,neo4j,900,"San Mateo, CA",Database
+PagerDuty,greenhouse,pagerduty,1200,"San Francisco, CA",Dev tools
+ClickUp,ashby,clickup,1000,"San Diego, CA",Productivity
+LaunchDarkly,greenhouse,launchdarkly,700,"Oakland, CA",Dev tools
+Mixpanel,greenhouse,mixpanel,400,"San Francisco, CA",Analytics
+SingleStore,greenhouse,singlestore,400,"San Francisco, CA",Database
+Algolia,greenhouse,algolia,700,"San Francisco, CA",Search
+Huntress,greenhouse,huntress,800,"Ellicott City, MD",Security
+Starburst,greenhouse,starburst,500,"Boston, MA",Data
+Drata,ashby,drata,600,"San Diego, CA",Security
+Squarespace,greenhouse,squarespace,1700,"New York, NY",Web
+Redis,ashby,redis,900,"Mountain View, CA",Database
+Snyk,ashby,snyk,1000,"Boston, MA",Security
+Honeycomb,greenhouse,honeycomb,250,"San Francisco, CA",Observability
+Oscar Health,greenhouse,oscar,2500,"New York, NY",Health
+Lyft,greenhouse,lyft,3000,"San Francisco, CA",Mobility
+Riot Games,greenhouse,riotgames,4000,"Los Angeles, CA",Gaming
+Epic Games,greenhouse,epicgames,4000,"Cary, NC",Gaming
+Justworks,greenhouse,justworks,1000,"New York, NY",HR
+Headway,ashby,headway,500,"New York, NY",Health
+Spotify,lever,spotify,7300,"Stockholm, Sweden",Consumer
+Ro,lever,ro,1000,"New York, NY",Health
+Peloton,greenhouse,peloton,2900,"New York, NY",Fitness
+Checkr,greenhouse,checkr,800,"San Francisco, CA",HR
+StockX,greenhouse,stockx,1000,"Detroit, MI",Marketplace
+Coursera,greenhouse,coursera,1200,"Mountain View, CA",EdTech
+Flatiron Health,greenhouse,flatironhealth,2000,"New York, NY",Health
