@@ -11,12 +11,17 @@ shape so everything downstream is ATS-agnostic:
 ``published_at`` is best-effort (each ATS exposes it differently, and some
 omit it). It is *not* how "new roles" are detected — that comes from diffing
 dated snapshots by ``role_id`` in the warehouse — so a missing value is fine.
+
+A fetch either returns the board's real contents or raises ``FetchError``.
+It never degrades to an empty list: an empty list means the board genuinely
+has no openings, so a timeout must not be able to masquerade as one.
 """
 
 from __future__ import annotations
 
 import datetime as dt
 import logging
+import time
 from typing import Callable, Optional
 
 import requests
@@ -24,17 +29,46 @@ import requests
 logger = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT_S = 25
+MAX_ATTEMPTS = 4             # 1 try + 3 retries
+BACKOFF_S = 2.0              # waits 2s, 4s, 8s between attempts
+MAX_RETRY_AFTER_S = 60       # cap on a server-requested Retry-After
+# Worth retrying: rate limits, timeouts, and server-side errors. Anything else
+# (404 board renamed, 403, ...) won't fix itself, so it fails immediately.
+_TRANSIENT_STATUS = {408, 425, 429, 500, 502, 503, 504}
 _UA = {"User-Agent": "hiring-leaderboard (+https://github.com/)"}
 
 
-def _get(url: str) -> Optional[dict | list]:
-    try:
-        r = requests.get(url, timeout=REQUEST_TIMEOUT_S, headers=_UA)
-        r.raise_for_status()
-        return r.json()
-    except (requests.RequestException, ValueError) as exc:
-        logger.warning("fetch failed for %s: %s", url, exc)
-        return None
+class FetchError(Exception):
+    """A job board couldn't be fetched, even after retries."""
+
+
+def _get(url: str) -> dict | list:
+    """GET a JSON document, retrying transient failures with backoff."""
+    last = "unknown error"
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        wait = BACKOFF_S * 2 ** (attempt - 1)
+        try:
+            r = requests.get(url, timeout=REQUEST_TIMEOUT_S, headers=_UA)
+        except requests.RequestException as exc:  # timeout, DNS, connection reset
+            last = f"{type(exc).__name__}: {exc}"
+        else:
+            if r.status_code == 200:
+                try:
+                    return r.json()
+                except ValueError:
+                    last = "response was not valid JSON"
+            elif r.status_code in _TRANSIENT_STATUS:
+                last = f"HTTP {r.status_code}"
+                retry_after = r.headers.get("Retry-After", "")
+                if retry_after.isdigit():
+                    wait = min(int(retry_after), MAX_RETRY_AFTER_S)
+            else:
+                raise FetchError(f"HTTP {r.status_code} from {url}")
+        if attempt < MAX_ATTEMPTS:
+            logger.warning("attempt %d/%d failed for %s (%s); retrying in %.0fs",
+                           attempt, MAX_ATTEMPTS, url, last, wait)
+            time.sleep(wait)
+    raise FetchError(f"{url} failed after {MAX_ATTEMPTS} attempts: {last}")
 
 
 def _iso(value) -> Optional[str]:
@@ -65,8 +99,8 @@ def _is_remote(location: Optional[str]) -> bool:
 # ---------------------------------------------------------------------------
 def fetch_greenhouse(company: str, slug: str) -> list[dict]:
     data = _get(f"https://boards-api.greenhouse.io/v1/boards/{slug}/departments")
-    if not data:
-        return []
+    if not isinstance(data, dict) or "departments" not in data:
+        raise FetchError(f"unexpected Greenhouse payload for {company!r}")
     roles: dict[int, dict] = {}
     for dept in data.get("departments", []):
         dept_name = dept.get("name") or None
@@ -94,7 +128,7 @@ def fetch_greenhouse(company: str, slug: str) -> list[dict]:
 def fetch_lever(company: str, slug: str) -> list[dict]:
     data = _get(f"https://api.lever.co/v0/postings/{slug}?mode=json")
     if not isinstance(data, list):
-        return []
+        raise FetchError(f"unexpected Lever payload for {company!r}")
     roles = []
     for job in data:
         cats = job.get("categories") or {}
@@ -119,8 +153,8 @@ def fetch_lever(company: str, slug: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 def fetch_ashby(company: str, slug: str) -> list[dict]:
     data = _get(f"https://api.ashbyhq.com/posting-api/job-board/{slug}")
-    if not isinstance(data, dict):
-        return []
+    if not isinstance(data, dict) or "jobs" not in data:
+        raise FetchError(f"unexpected Ashby payload for {company!r}")
     roles = []
     for job in data.get("jobs", []):
         location = job.get("location")
@@ -147,11 +181,14 @@ ATS_FETCHERS: dict[str, Callable[[str, str], list[dict]]] = {
 
 
 def fetch_company(company: str, ats: str, slug: str, captured_at: Optional[str] = None) -> list[dict]:
-    """Fetch and normalize one company's open roles, stamped with a snapshot date."""
+    """Fetch and normalize one company's open roles, stamped with a snapshot date.
+
+    Raises ``FetchError`` if the board can't be read; an empty list means the
+    board was read successfully and has no openings.
+    """
     fetcher = ATS_FETCHERS.get(ats.lower().strip())
     if fetcher is None:
-        logger.warning("unknown ATS %r for %s", ats, company)
-        return []
+        raise FetchError(f"unknown ATS {ats!r} for {company!r}")
     captured_at = captured_at or dt.date.today().isoformat()
     roles = fetcher(company, slug)
     for r in roles:

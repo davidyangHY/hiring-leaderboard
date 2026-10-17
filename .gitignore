@@ -18,6 +18,7 @@ dbt_project/dbt_packages/
 # (rebuilt from the Parquet each run) and any scratch raw files.
 data/hiring.duckdb
 data/raw/
+validation-errors.txt
 
 # Parked earlier project iteration — kept locally, not part of this repo.
 archive/

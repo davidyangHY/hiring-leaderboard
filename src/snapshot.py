@@ -10,23 +10,28 @@ window" is later derived by first-seen date:
 so a role counts as *new* in the window that contains its first snapshot. Closed
 roles simply stop appearing — their last snapshot marks when they went away.
 
-Running twice in one day is idempotent (INSERT OR IGNORE on the day's key).
-The ``companies`` dim table mirrors the seed so downstream joins (e.g. roles per
-1k employees) don't need the CSV.
+Nothing is written until the day passes the validation gate (src/validate.py):
+a company that can't be fetched, or one that suddenly reports zero roles, blocks
+the whole snapshot rather than saving a partial one. Running twice in one day
+replaces that day's rows, so reruns are safe. The ``companies`` dim table mirrors
+the seed so downstream joins (e.g. roles per headcount) don't need the CSV.
 """
 
 from __future__ import annotations
 
 import datetime as dt
 import logging
+import os
+import sys
 import time
 from pathlib import Path
 
 import duckdb
 
-from src.ats import fetch_company
+from src.ats import FetchError, fetch_company
 from src.classify import classify_function
 from src.seed import load_companies
+from src.validate import render_report, validate_snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -129,8 +134,21 @@ def _to_date(value):
         return None
 
 
+def previous_counts(con: duckdb.DuckDBPyConnection, captured_at: str) -> tuple[str | None, dict[str, int]]:
+    """Per-company role counts from the most recent snapshot before ``captured_at``."""
+    prev = con.execute(
+        "SELECT MAX(captured_at) FROM role_snapshots WHERE captured_at < ?", [captured_at]
+    ).fetchone()[0]
+    if prev is None:
+        return None, {}
+    rows = con.execute(
+        "SELECT company, COUNT(*) FROM role_snapshots WHERE captured_at = ? GROUP BY company", [prev]
+    ).fetchall()
+    return str(prev), {company: n for company, n in rows}
+
+
 def write_snapshot(con: duckdb.DuckDBPyConnection, roles: list[dict], captured_at: str) -> int:
-    """Insert one day's normalized+classified roles; idempotent for that day."""
+    """Store one day's normalized+classified roles, replacing any earlier run that day."""
     cap = _to_date(captured_at)
     rows = [
         (
@@ -141,9 +159,9 @@ def write_snapshot(con: duckdb.DuckDBPyConnection, roles: list[dict], captured_a
         )
         for r in roles
     ]
+    con.execute("DELETE FROM role_snapshots WHERE captured_at = ?", [cap])
     if not rows:
         return 0
-    before = con.execute("SELECT COUNT(*) FROM role_snapshots").fetchone()[0]
     con.executemany(
         """INSERT OR IGNORE INTO role_snapshots (
              captured_at, company, ats, role_id, title, department, function,
@@ -151,48 +169,98 @@ def write_snapshot(con: duckdb.DuckDBPyConnection, roles: list[dict], captured_a
            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         rows,
     )
-    after = con.execute("SELECT COUNT(*) FROM role_snapshots").fetchone()[0]
-    return after - before
+    return con.execute(
+        "SELECT COUNT(*) FROM role_snapshots WHERE captured_at = ?", [cap]
+    ).fetchone()[0]
+
+
+class SnapshotRejected(Exception):
+    """Today's snapshot failed validation, so nothing was written."""
+
+    def __init__(self, report: str, errors: list[str]):
+        super().__init__(f"{len(errors)} validation error(s)")
+        self.report = report
+        self.errors = errors
+
+
+def fetch_all(companies: list[dict], captured_at: str, delay: float = 0.1
+              ) -> tuple[list[dict], dict[str, int], dict[str, str]]:
+    """Fetch every company. Returns (roles, per-company counts, per-company failures)."""
+    roles: list[dict] = []
+    counts: dict[str, int] = {}
+    failures: dict[str, str] = {}
+    for c in companies:
+        try:
+            got = fetch_company(c["company"], c["ats"], c["slug"], captured_at=captured_at)
+        except FetchError as exc:
+            failures[c["company"]] = str(exc)
+            logger.error("%s: %s", c["company"], exc)
+        else:
+            roles.extend(got)
+            counts[c["company"]] = len(got)
+        time.sleep(delay)
+    return roles, counts, failures
+
+
+def _publish_report(report: str) -> None:
+    """Log the validation report and, in GitHub Actions, show it on the run page."""
+    logger.info("\n%s", report)
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as fh:
+            fh.write(report + "\n")
 
 
 def run_daily_snapshot(
     db_path: Path | None = None,
     captured_at: str | None = None,
     delay: float = 0.1,
+    snapshot_dir: Path | None = None,
+    seed_path: Path | None = None,
 ) -> dict:
-    """Fetch every seed company's open roles and store today's snapshot."""
+    """Fetch every seed company, validate the day, and store it only if it passes.
+
+    Raises ``SnapshotRejected`` (writing nothing) if validation fails.
+    """
     captured_at = captured_at or dt.date.today().isoformat()
-    companies = load_companies()
+    companies = load_companies(seed_path)
     con = get_connection(db_path)
-    loaded = load_history(con)          # rebuild prior history from committed Parquet
-    sync_companies(con, companies)
+    try:
+        loaded = load_history(con, snapshot_dir)   # rebuild prior history from committed Parquet
+        sync_companies(con, companies)
 
-    all_roles: list[dict] = []
-    failed: list[str] = []
-    for c in companies:
-        roles = fetch_company(c["company"], c["ats"], c["slug"], captured_at=captured_at)
-        if not roles:
-            failed.append(c["company"])
-        all_roles.extend(roles)
-        time.sleep(delay)
+        roles, counts, failures = fetch_all(companies, captured_at, delay)
+        prev_date, prev = previous_counts(con, captured_at)
+        null_rate = sum(1 for r in roles if not r.get("published_at")) / len(roles) if roles else 0.0
+        result = validate_snapshot(counts, failures, prev, null_rate)
+        report = render_report(result, captured_at, prev_date)
+        _publish_report(report)
+        if not result.ok:
+            raise SnapshotRejected(report, result.errors)
 
-    inserted = write_snapshot(con, all_roles, captured_at)
-    parquet = write_day_parquet(con, captured_at)   # persist today for future runs
-    stats = {
+        written = write_snapshot(con, roles, captured_at)
+        parquet = write_day_parquet(con, captured_at, snapshot_dir)  # persist today for future runs
+    finally:
+        con.close()
+
+    logger.info("snapshot %s saved: %d roles from %d companies; history files=%d",
+                captured_at, written, len(companies), loaded)
+    return {
         "captured_at": captured_at,
         "companies": len(companies),
-        "failed": failed,
-        "roles_fetched": len(all_roles),
-        "rows_inserted": inserted,
+        "roles": written,
+        "warnings": result.warnings,
         "history_files_loaded": loaded,
         "parquet": str(parquet),
     }
-    logger.info("snapshot %s: %d roles from %d companies (%d new rows), %d failed; history files=%d",
-                captured_at, len(all_roles), len(companies), inserted, len(failed), loaded)
-    con.close()
-    return stats
 
 
 if __name__ == "__main__":  # pragma: no cover
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    print(run_daily_snapshot())
+    try:
+        print(run_daily_snapshot())
+    except SnapshotRejected as exc:
+        # Picked up by the workflow's failure alert.
+        Path("validation-errors.txt").write_text("\n".join(exc.errors), encoding="utf-8")
+        logger.error("Snapshot BLOCKED — nothing was saved:\n- %s", "\n- ".join(exc.errors))
+        sys.exit(1)

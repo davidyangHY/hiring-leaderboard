@@ -18,7 +18,7 @@ import logging
 import time
 from pathlib import Path
 
-from src.ats import ATS_FETCHERS, fetch_company
+from src.ats import ATS_FETCHERS, FetchError, fetch_company
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +54,11 @@ def verify(path: Path | None = None) -> None:
     ok = 0
     print(f"Verifying {len(rows)} companies...\n")
     for row in rows:
-        roles = fetch_company(row["company"], row["ats"], row["slug"])
-        n = len(roles)
+        try:
+            n = len(fetch_company(row["company"], row["ats"], row["slug"]))
+        except FetchError as exc:
+            print(f"  [ERR ] {row['company']:16} {row['ats']:11} {row['slug']:16} {exc}")
+            continue
         status = "OK " if n else "DEAD"
         if n:
             ok += 1
@@ -71,7 +74,10 @@ def find(slug: str) -> None:
     print(f"Probing slug {slug!r} across ATS providers...\n")
     hits = []
     for ats in ATS_FETCHERS:
-        roles = fetch_company(slug, ats, slug)
+        try:
+            roles = fetch_company(slug, ats, slug)
+        except FetchError:
+            roles = []  # expected: most providers 404 for a slug that isn't theirs
         if roles:
             hits.append((ats, len(roles)))
             print(f"  MATCH  {ats:11} -> {len(roles)} roles")

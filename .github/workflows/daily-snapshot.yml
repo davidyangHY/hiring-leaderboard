@@ -21,6 +21,10 @@ jobs:
   snapshot:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      # Optional Discord/Slack webhook for failure alerts (repo secret). If unset,
+      # GitHub's own "workflow failed" email is the alert.
+      ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +36,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Snapshot job boards (fetch + classify + CDC)
+      - name: Unit tests
+        run: python -m pytest -q tests
+
+      # Fails the run (and so blocks dbt, export, commit and deploy) if any company
+      # can't be fetched after retries or the day fails validation.
+      - name: Snapshot job boards (fetch + validate + store)
         run: python -m src.snapshot
 
       - name: Build + test dbt models
@@ -52,3 +61,14 @@ jobs:
             git commit -m "chore: daily snapshot $(date -u +%Y-%m-%d)"
             git push
           fi
+
+      - name: Alert on failure
+        if: failure() && env.ALERT_WEBHOOK_URL != ''
+        run: |
+          details=$(head -c 1200 validation-errors.txt 2>/dev/null || echo "See the run log.")
+          msg=$(printf '**Hiring Leaderboard: daily snapshot FAILED** (%s)\n%s\n%s' \
+            "$(date -u +%Y-%m-%d)" "$details" \
+            "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}")
+          # "content" is Discord's field, "text" is Slack's; each ignores the other.
+          jq -n --arg m "$msg" '{content: $m, text: $m}' \
+            | curl -sS -X POST -H 'Content-Type: application/json' -d @- "$ALERT_WEBHOOK_URL"
