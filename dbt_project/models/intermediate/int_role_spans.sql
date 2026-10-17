@@ -1,13 +1,14 @@
 -- Collapse the daily snapshots into one row per role, with its lifespan.
 --
 -- effective_posted_date is the ATS-reported publish date (the earliest one we
--- ever saw, so a company re-dating a posting later doesn't move it), as long as
--- it's sane; otherwise it falls back to the first day we captured the role.
+-- ever saw, so a company re-dating a posting later doesn't move it). Old dates
+-- are trusted: a long-running "evergreen" posting really was posted years ago.
+-- Only a missing or future date falls back to the first day we captured it.
 --
--- Open vs. closed: a role is closed only once it has been missing from
--- `closed_after_missed_snapshots` consecutive snapshot days (default 2), so a
--- one-day blip can't close it. Days we have no snapshot for (e.g. 2026-08-27)
--- don't count as misses. closed_on is the first day it went missing.
+-- Open vs. closed: a role is closed once it has been missing from
+-- `closed_after_missed_snapshots` consecutive snapshot days (see
+-- dbt_project.yml). Days we have no snapshot for (e.g. 2026-08-27) don't count
+-- as misses. closed_on is the first day it went missing.
 with snaps as (
     select * from {{ ref('stg_role_snapshots') }}
 ),
@@ -24,9 +25,8 @@ spans as (
         max(captured_at)                    as last_capture,
         min(published_at)                   as published_at,
         case
-            when min(published_at) between date '2018-01-01' and current_date
-                then min(published_at)
-            else min(captured_at)
+            when min(published_at) <= current_date then min(published_at)
+            else min(captured_at)           -- missing or future-dated
         end                                 as effective_posted_date,
         arg_max(title, captured_at)         as title,
         arg_max(function, captured_at)      as function,
