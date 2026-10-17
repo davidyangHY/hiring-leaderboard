@@ -52,7 +52,6 @@ Wise,greenhouse,wise,5500,"London, UK",Fintech
 Modern Treasury,ashby,moderntreasury,150,"San Francisco, CA",Fintech
 Column,ashby,column,100,"San Francisco, CA",Fintech
 Stytch,ashby,stytch,120,"San Francisco, CA",Auth
-Marqeta,greenhouse,marqeta,800,"Oakland, CA",Fintech
 Carta,greenhouse,carta,1500,"San Francisco, CA",Fintech
 Alloy,greenhouse,alloy,400,"New York, NY",Fintech
 GitLab,greenhouse,gitlab,2100,Remote,Dev tools
@@ -61,15 +60,14 @@ Elastic,greenhouse,elastic,3500,"Mountain View, CA",Search
 MongoDB,greenhouse,mongodb,5000,"New York, NY",Database
 Grafana Labs,greenhouse,grafanalabs,1200,"New York, NY",Observability
 Sentry,ashby,sentry,350,"San Francisco, CA",Dev tools
-Postman,greenhouse,postman,800,"San Francisco, CA",Dev tools
 Supabase,ashby,supabase,120,Remote,Database
 Neon,ashby,neon,100,Remote,Database
 PlanetScale,greenhouse,planetscale,120,Remote,Database
 Cockroach Labs,greenhouse,cockroachlabs,350,"New York, NY",Database
-Temporal,greenhouse,temporaltechnologies,250,"Seattle, WA",Dev tools
+Temporal,ashby,temporal,250,"Seattle, WA",Dev tools
 Docker,ashby,docker,400,Remote,Dev tools
 Replit,ashby,replit,100,"San Francisco, CA",Dev tools
-ClickHouse,greenhouse,clickhouse,250,Remote,Data
+ClickHouse,ashby,clickhouse,250,Remote,Data
 Airbyte,ashby,airbyte,200,"San Francisco, CA",Data
 Fivetran,greenhouse,fivetran,1200,"Oakland, CA",Data
 Hex,ashby,hex,200,"San Francisco, CA",Data
@@ -77,8 +75,8 @@ Modal,ashby,modal,80,"New York, NY",AI infra
 Render,ashby,render,100,"San Francisco, CA",Cloud
 Warp,greenhouse,warp,60,"New York, NY",Dev tools
 Asana,greenhouse,asana,1600,"San Francisco, CA",Productivity
-Webflow,greenhouse,webflow,600,"San Francisco, CA",Web
-Amplitude,greenhouse,amplitude,800,"San Francisco, CA",Analytics
+Webflow,ashby,webflow,600,"San Francisco, CA",Web
+Amplitude,ashby,amplitude,800,"San Francisco, CA",Analytics
 Attentive,greenhouse,attentive,500,"New York, NY",Marketing
 Intercom,greenhouse,intercom,1000,"San Francisco, CA",SaaS
 Lattice,greenhouse,lattice,600,"San Francisco, CA",HR
