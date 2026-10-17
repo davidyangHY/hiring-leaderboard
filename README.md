@@ -51,7 +51,7 @@ The business logic lives in `src/`, so the pipeline is orchestrator-agnostic —
 - **Sources:** public applicant-tracking-system APIs — **Greenhouse, Lever, Ashby** (the same feeds their own careers pages use)
 - **What's counted:** job *postings*. A role listed in three cities counts three times. That's often three real openings and sometimes one flexible-location hire; companies differ, and public data can't tell which.
 - **When a role is "new":** the posting date the company's job board reports, pinned to the earliest date we've seen so a company re-dating a posting later can't move it.
-- **Open vs. closed (change-data-capture):** a role is closed once it's missing from two consecutive daily snapshots, so a one-day blip can't close it. Closed roles stay in the drill-down, greyed out with the date they disappeared.
+- **Open vs. closed (change-data-capture):** a role is closed on the first daily snapshot it's missing from. Closed roles stay in the drill-down, greyed out with the date they disappeared.
 - **History:** daily snapshots since Aug 23, 2026, persisted as Parquet (the source of truth; DuckDB is a derived cache). Timeframes reaching further back only include roles that were still open on that date.
 - **Coverage caveat:** only ATS-based boards are tracked. Companies on Workday / Eightfold / custom sites (e.g. Google, Meta, Netflix, Qualcomm) are intentionally excluded — those block automated access, and the tracked set is deliberately the boards meant to be read publicly.
 

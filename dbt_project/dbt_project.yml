@@ -11,9 +11,11 @@ target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
 vars:
-  # A role counts as closed only after it's missing from this many consecutive
-  # snapshot days, so a one-day blip on a job board can't close it.
-  closed_after_missed_snapshots: 2
+  # A role counts as closed once it's missing from this many consecutive
+  # snapshot days. 1 = closed the first day it's gone. Raising it guards against
+  # one-day blips, but in the first ~55 days of history that saved ~5 roles a day
+  # from a brief false "closed" while delaying ~200 real closures a day.
+  closed_after_missed_snapshots: 1
 
 models:
   hiring_leaderboard:
