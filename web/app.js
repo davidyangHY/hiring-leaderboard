@@ -236,7 +236,8 @@ async function openDetail(company) {
     r.c === company && r.d >= cutoff && (wantFn === "All" || r.f === wantFn));
 
   const fnLabel = wantFn === "All" ? "all functions" : wantFn;
-  $("m-sub").textContent = `${list.length} new ${wantFn === "All" ? "" : wantFn + " "}role${list.length === 1 ? "" : "s"} · ${fnLabel} · ${windowLabel()}`;
+  const stillOpen = list.filter((r) => !r.x).length;
+  $("m-sub").textContent = `${list.length} new ${wantFn === "All" ? "" : wantFn + " "}role${list.length === 1 ? "" : "s"} · ${stillOpen} still open · ${fnLabel} · ${windowLabel()}`;
 
   // seniority summary — each level is a clickable filter (click to toggle)
   detailRoles = list;
@@ -262,19 +263,26 @@ function renderDetailRoles() {
     listEl.innerHTML = `<li class="m-role m-role-empty">No roles at the selected level.</li>`;
     return;
   }
-  const sorted = [...rows].sort((a, b) =>
-    (SEN_ORDER.indexOf(a.s) - SEN_ORDER.indexOf(b.s)) || (a.d < b.d ? 1 : -1));
-  listEl.innerHTML = sorted.map((r) => {
-    const lead = r.s === "Leadership" ? " lead-lvl" : "";
+  // Open roles first, then closed ones; within each, senior-most then newest.
+  const order = (a, b) =>
+    (SEN_ORDER.indexOf(a.s) - SEN_ORDER.indexOf(b.s)) || (a.d < b.d ? 1 : -1);
+  const open = rows.filter((r) => !r.x).sort(order);
+  const closed = rows.filter((r) => r.x).sort(order);
+
+  const item = (r) => {
+    const lead = r.s === "Leadership" && !r.x ? " lead-lvl" : "";
     const title = r.u
       ? `<a href="${escapeHtml(r.u)}" target="_blank" rel="noopener">${escapeHtml(r.t)}</a>`
       : `<span class="rt">${escapeHtml(r.t)}</span>`;
-    return `<li class="m-role">
+    return `<li class="m-role${r.x ? " closed" : ""}">
       <span class="lvl${lead}">${r.s}</span>
       ${title}
-      <span class="rd">${r.d}</span>
+      <span class="rd">${r.x ? '<span class="closed-tag">Closed</span>' : ""}${r.d}</span>
     </li>`;
-  }).join("");
+  };
+  listEl.innerHTML = open.map(item).join("")
+    + (closed.length ? `<li class="m-divider">No longer open · ${closed.length}</li>` : "")
+    + closed.map(item).join("");
 }
 
 // theme

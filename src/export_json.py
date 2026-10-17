@@ -47,15 +47,20 @@ def export(db_path: Path | None = None, out_dir: Path | None = None) -> dict:
         from mart_company_summary order by company""")
 
     # Per-role list for the company drill-down. Seniority is derived here from
-    # the title. Compact keys: company, function, seniority, title, date, url.
+    # the title. Compact keys: company, function, seniority, title, date, plus
+    # url for open roles or x=1 for roles that have since closed (their links are
+    # dead, so they're shown greyed out and the url is dropped).
     roles = con.execute(
-        """select company, function, title, url, posted_date
+        """select company, function, title, url, posted_date, is_open
            from mart_role_list order by posted_date desc""").fetchall()
-    roles_json = [
-        {"c": c, "f": f, "s": classify_seniority(t), "t": t,
-         "d": d.isoformat(), "u": u}
-        for c, f, t, u, d in roles
-    ]
+    roles_json = []
+    for c, f, t, u, d, is_open in roles:
+        role = {"c": c, "f": f, "s": classify_seniority(t), "t": t, "d": d.isoformat()}
+        if is_open:
+            role["u"] = u
+        else:
+            role["x"] = 1
+        roles_json.append(role)
 
     functions = [r[0] for r in con.execute(
         "select distinct function from mart_new_roles_daily order by 1").fetchall()]
