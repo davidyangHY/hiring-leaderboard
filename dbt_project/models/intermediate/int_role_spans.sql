@@ -1,13 +1,13 @@
 -- Collapse the daily snapshots into one row per role, with its lifespan.
 --
--- effective_posted_date bootstraps history from the ATS-reported publish date
--- (so the leaderboard has a real time series from day one), but only when that
--- date is sane; otherwise it falls back to the first day we captured the role.
--- Going forward, first_capture (from our own snapshots) is the ground truth.
+-- effective_posted_date is the ATS-reported publish date (the earliest one we
+-- ever saw, so a company re-dating a posting later doesn't move it), as long as
+-- it's sane; otherwise it falls back to the first day we captured the role.
 --
--- closed_on is the first snapshot day the role was missing, i.e. the day we
--- noticed it was gone. If there's a gap in our snapshots right after its last
--- sighting, this is the next day we have data for, never a guess.
+-- Open vs. closed: a role is closed only once it has been missing from
+-- `closed_after_missed_snapshots` consecutive snapshot days (default 2), so a
+-- one-day blip can't close it. Days we have no snapshot for (e.g. 2026-08-27)
+-- don't count as misses. closed_on is the first day it went missing.
 with snaps as (
     select * from {{ ref('stg_role_snapshots') }}
 ),
@@ -33,16 +33,23 @@ spans as (
         arg_max(department, captured_at)    as department,
         arg_max(location, captured_at)      as location,
         arg_max(is_remote, captured_at)     as is_remote,
-        arg_max(url, captured_at)           as url,
-        -- still open on the most recent snapshot day?
-        max(captured_at) = (select max(captured_at) from snaps) as is_open
+        arg_max(url, captured_at)           as url
     from snaps
     group by company, role_id
+),
+
+with_misses as (
+    select
+        spans.*,
+        -- every snapshot day after its last sighting is a day it was missing
+        (select count(*) from snapshot_days d where d.day > spans.last_capture) as missed_snapshots,
+        (select min(d.day) from snapshot_days d where d.day > spans.last_capture) as first_missing_day
+    from spans
 )
 
 select
-    spans.*,
-    case when not is_open then (
-        select min(d.day) from snapshot_days d where d.day > spans.last_capture
-    ) end                                   as closed_on
-from spans
+    * exclude (first_missing_day),
+    missed_snapshots < {{ var('closed_after_missed_snapshots') }} as is_open,
+    case when missed_snapshots >= {{ var('closed_after_missed_snapshots') }}
+         then first_missing_day end          as closed_on
+from with_misses
