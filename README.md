@@ -59,9 +59,9 @@ The business logic lives in `src/`, so the pipeline is orchestrator-agnostic —
 
 An audit of the first 54 days found every run had reported success while six company-days were silently stored as zero roles, and five companies had shown no openings for weeks after moving job boards. The pipeline now fails loudly instead:
 
-- **No silent zeros:** a fetch either returns the board's real contents or raises. Timeouts, rate limits and server errors retry with backoff; a moved board (404) fails immediately.
+- **No silent zeros:** a fetch either returns the board's real contents or raises. Timeouts, rate limits and server errors retry with backoff; a moved board (404) fails immediately. Companies still failing get a second pass at the end of the run, so a short outage on one board doesn't block the day.
 - **Validation gate:** before anything is written, the day is blocked if any company can't be fetched, a company with roles yesterday reports none, total roles drop more than 30%, or posting dates go missing. A blocked day saves, commits and deploys nothing, so the site keeps yesterday's data.
-- **Backup run:** a second scheduled run each afternoon retries the day if the morning run never fired or was blocked, and does nothing otherwise. Re-running a day replaces it, so reruns are safe.
+- **Automatic re-runs:** if a scheduled run is blocked, the snapshot runs again 20 minutes later. A second scheduled run each afternoon also retries the day if the morning run never fired or was blocked, and does nothing otherwise. Re-running a day replaces it, so reruns are safe.
 - **Tests on every run:** unit tests before the pipeline, dbt data tests after modeling; any failure emails the maintainer.
 
 ## Tech stack
