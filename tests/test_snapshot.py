@@ -55,7 +55,8 @@ def project(tmp_path, monkeypatch):
 
 def run(tmp_path, seed, snaps):
     return snapshot.run_daily_snapshot(db_path=tmp_path / "run.duckdb", captured_at="2026-10-17",
-                                       delay=0, snapshot_dir=snaps, seed_path=seed)
+                                       delay=0, snapshot_dir=snaps, seed_path=seed,
+                                       second_pass_delay=0)
 
 
 def test_failed_company_blocks_the_whole_day(project, monkeypatch):
@@ -71,6 +72,24 @@ def test_failed_company_blocks_the_whole_day(project, monkeypatch):
         run(tmp_path, seed, snaps)
     assert any("Beta" in e for e in exc.value.errors)
     assert not (snaps / "2026-10-17.parquet").exists()
+
+
+def test_company_that_recovers_on_the_second_pass_is_saved(project, monkeypatch):
+    """2026-10-28: Anduril timed out on every retry, then answered fine minutes later."""
+    tmp_path, seed, snaps = project
+    calls = []
+
+    def flaky(company, ats, slug, captured_at=None):
+        calls.append(company)
+        if company == "Beta" and calls.count("Beta") == 1:
+            raise FetchError("ReadTimeout after 4 attempts")
+        return roles(company, range(10), captured_at)
+
+    monkeypatch.setattr(snapshot, "fetch_company", flaky)
+    stats = run(tmp_path, seed, snaps)
+    assert stats["roles"] == 20
+    assert calls == ["Acme", "Beta", "Beta"]  # only the failed company is retried
+    assert (snaps / "2026-10-17.parquet").exists()
 
 
 def test_company_reporting_zero_blocks_the_whole_day(project, monkeypatch):

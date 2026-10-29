@@ -39,6 +39,10 @@ DEFAULT_DB_PATH = Path("data/hiring.duckdb")
 # Committed, append-only history. The DuckDB file is a derived cache rebuilt
 # from these each run, so snapshot history survives ephemeral CI runners.
 SNAPSHOT_DIR = Path("data/snapshots")
+# Companies that still fail after their own retries get one more try at the end
+# of the run, after this pause. Short outages (e.g. a Greenhouse slowdown on one
+# board) have usually cleared by then, so the day isn't blocked for a blip.
+SECOND_PASS_DELAY_S = 60
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS companies (
@@ -217,10 +221,13 @@ def run_daily_snapshot(
     delay: float = 0.1,
     snapshot_dir: Path | None = None,
     seed_path: Path | None = None,
+    second_pass_delay: float = SECOND_PASS_DELAY_S,
 ) -> dict:
     """Fetch every seed company, validate the day, and store it only if it passes.
 
-    Raises ``SnapshotRejected`` (writing nothing) if validation fails.
+    Companies that fail are retried once more at the end of the run, after
+    ``second_pass_delay`` seconds. Raises ``SnapshotRejected`` (writing nothing)
+    if validation still fails.
     """
     captured_at = captured_at or dt.date.today().isoformat()
     companies = load_companies(seed_path)
@@ -230,6 +237,16 @@ def run_daily_snapshot(
         sync_companies(con, companies)
 
         roles, counts, failures = fetch_all(companies, captured_at, delay)
+        if failures:
+            logger.warning("second pass in %.0fs for %d failed compan%s: %s", second_pass_delay,
+                           len(failures), "y" if len(failures) == 1 else "ies", ", ".join(failures))
+            time.sleep(second_pass_delay)
+            retry = [c for c in companies if c["company"] in failures]
+            more_roles, more_counts, failures = fetch_all(retry, captured_at, delay)
+            roles += more_roles
+            counts.update(more_counts)
+            for company in more_counts:
+                logger.info("%s recovered on the second pass", company)
         prev_date, prev = previous_counts(con, captured_at)
         null_rate = sum(1 for r in roles if not r.get("published_at")) / len(roles) if roles else 0.0
         result = validate_snapshot(counts, failures, prev, null_rate)
